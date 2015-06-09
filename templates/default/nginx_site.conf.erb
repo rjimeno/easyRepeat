@@ -1,0 +1,30 @@
+server {
+  listen 80;
+  listen [::]:80 ipv6only=on; # listen for IPv6 only traffic on IPv6 sockets
+
+  server_name  <%= node['easyrepeat']['server_name'] %>;
+
+  access_log /var/log/nginx/easyrepeat.access.log;
+  error_log /var/log/nginx/easyrepeat.error.log warn;
+
+  root <%= node['easyrepeat']['web_dir'] %>/public;
+
+  location / {
+    index  index.html;
+  }
+
+  location ~ /crossdomain.xml {
+    root <%= node['easyrepeat']['web_dir'] %>/public/easyrepeat;
+  }
+
+  location /ping-lite {
+    return 200 'PONG';
+    default_type text/plain;
+  }
+}
+
+server {
+  listen 443;
+  server_name <%= node['easyrepeat']['server_name'] %>;
+  rewrite ^(.*) http://<%= node['easyrepeat']['server_name'] %>$1 permanent;
+}
